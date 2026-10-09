@@ -537,6 +537,9 @@
                     <button onclick="downloadSchedulePDF()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs rounded-xl shadow transition">
                         <i class="fa-solid fa-file-pdf mr-1"></i> PDF Programación
                     </button>
+                    <button onclick="openBackupModal()" class="px-3 py-1.5 rounded-lg text-emerald-400 hover:bg-slate-700 transition font-bold flex items-center gap-1.5">
+                        <i class="fa-solid fa-database"></i> Copia de Seguridad
+                    </button>
                 </div>
             </div>
 
@@ -1130,12 +1133,95 @@
             </form>
         </div>
     </div>
+        <!-- MODAL DE COPIAS DE SEGURIDAD (RESPALDOS) -->
+    <div id="modal-backup" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-6 space-y-5 border border-slate-200">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div class="flex items-center space-x-2">
+                    <div class="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
+                        <i class="fa-solid fa-database text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base text-slate-800">Copias de Seguridad (Exportar / Importar)</h3>
+                        <p class="text-xs text-slate-500">Gestión global y por secciones independientes</p>
+                    </div>
+                </div>
+                <button onclick="closeBackupModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
 
+            <!-- Opción 1: Respaldo Completo -->
+            <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
+                <h4 class="font-bold text-xs text-emerald-900 uppercase flex items-center gap-1.5">
+                    <i class="fa-solid fa-boxes-packing text-emerald-600"></i> Copia de Seguridad General (Todo)
+                </h4>
+                <p class="text-[11px] text-emerald-700">Descarga o restaura toda la base de datos (Personal, Horarios, Asistencias y Pabellones) de una sola vez.</p>
+                <div class="flex flex-wrap gap-2 pt-1">
+                    <button onclick="exportBackup('ALL')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> Descargar Todo (.json)
+                    </button>
+                    <button onclick="triggerImport('ALL')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-lg shadow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-upload"></i> Restaurar Todo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Opción 2: Respaldos Modulares por Sección -->
+            <div class="space-y-3">
+                <h4 class="font-bold text-xs text-slate-700 uppercase">Respaldos Individuales por Sección</h4>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <!-- Horarios (Sección más usada) -->
+                    <div class="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-1">
+                        <span class="font-bold text-blue-900 block"><i class="fa-solid fa-calendar-days text-blue-600 mr-1"></i> Programación Horarios</span>
+                        <div class="flex gap-1.5 pt-1">
+                            <button onclick="exportBackup('SHIFTS')" class="flex-1 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded text-[11px]">Exportar</button>
+                            <button onclick="triggerImport('SHIFTS')" class="flex-1 py-1 bg-slate-700 hover:bg-slate-800 text-white font-semibold rounded text-[11px]">Importar</button>
+                        </div>
+                    </div>
+
+                    <!-- Asistencia -->
+                    <div class="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-1">
+                        <span class="font-bold text-emerald-900 block"><i class="fa-solid fa-clock text-emerald-600 mr-1"></i> Marcaje Asistencia</span>
+                        <div class="flex gap-1.5 pt-1">
+                            <button onclick="exportBackup('ATTENDANCE')" class="flex-1 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded text-[11px]">Exportar</button>
+                            <button onclick="triggerImport('ATTENDANCE')" class="flex-1 py-1 bg-slate-700 hover:bg-slate-800 text-white font-semibold rounded text-[11px]">Importar</button>
+                        </div>
+                    </div>
+
+                    <!-- Personal -->
+                    <div class="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-1">
+                        <span class="font-bold text-sky-900 block"><i class="fa-solid fa-users text-sky-600 mr-1"></i> Gestión Personal</span>
+                        <div class="flex gap-1.5 pt-1">
+                            <button onclick="exportBackup('WORKERS')" class="flex-1 py-1 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded text-[11px]">Exportar</button>
+                            <button onclick="triggerImport('WORKERS')" class="flex-1 py-1 bg-slate-700 hover:bg-slate-800 text-white font-semibold rounded text-[11px]">Importar</button>
+                        </div>
+                    </div>
+
+                    <!-- Pabellones -->
+                    <div class="p-3 border border-slate-200 rounded-xl bg-slate-50 space-y-1">
+                        <span class="font-bold text-teal-900 block"><i class="fa-solid fa-hospital-bed text-teal-600 mr-1"></i> Pabellones</span>
+                        <div class="flex gap-1.5 pt-1">
+                            <button onclick="exportBackup('PAVILIONS')" class="flex-1 py-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded text-[11px]">Exportar</button>
+                            <button onclick="triggerImport('PAVILIONS')" class="flex-1 py-1 bg-slate-700 hover:bg-slate-800 text-white font-semibold rounded text-[11px]">Importar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Oculto de Selección de Archivos -->
+            <input type="file" id="backup-file-input" accept=".json" class="hidden" onchange="handleImportFile(event)">
+
+            <div class="flex justify-end pt-2 border-t">
+                <button onclick="closeBackupModal()" class="px-4 py-2 text-xs text-slate-600 font-semibold hover:bg-slate-100 rounded-xl">Cerrar</button>
+            </div>
+        </div>
+    </div>
     <!-- TOAST NOTIFICADOR -->
     <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl text-xs font-semibold hidden flex items-center space-x-2">
         <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
         <span id="toast-msg">Mensaje</span>
     </div>
+    
     <!-- jsPDF y AutoTable para generación de reportes en PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -3306,6 +3392,116 @@
 
             doc.save(`Estructura_Pabellones_${new Date().toISOString().split('T')[0]}.pdf`);
             showToast('PDF de estructura de pabellones descargado.', true);
+        }
+
+        let currentImportSection = 'ALL';
+
+        function openBackupModal() {
+            document.getElementById('modal-backup').classList.remove('hidden');
+        }
+
+        function closeBackupModal() {
+            document.getElementById('modal-backup').classList.add('hidden');
+        }
+
+        // Función para descargar un JSON
+        function downloadJSON(data, filename) {
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Exportar copia de seguridad (General o Específica)
+        async function exportBackup(section) {
+            const keys = db.STORAGE_KEYS;
+            const dateStr = new Date().toISOString().split('T')[0];
+
+            if (section === 'ALL') {
+                const fullBackup = {
+                    version: '5.0',
+                    exportedAt: new Date().toISOString(),
+                    type: 'FULL_BACKUP',
+                    data: {
+                        workers: JSON.parse(localStorage.getItem(keys.WORKERS) || '[]'),
+                        shifts: JSON.parse(localStorage.getItem(keys.SHIFTS) || '{}'),
+                        holidays: JSON.parse(localStorage.getItem(keys.HOLIDAYS) || '{}'),
+                        attendance: JSON.parse(localStorage.getItem(keys.ATTENDANCE) || '[]'),
+                        pavilions: JSON.parse(localStorage.getItem(keys.PAVILIONS) || '[]')
+                    }
+                };
+                downloadJSON(fullBackup, `Respaldo_General_Farmacia_${dateStr}.json`);
+                showToast('Copia de Seguridad General descargada con éxito.');
+            } else {
+                const key = keys[section];
+                const rawData = localStorage.getItem(key);
+                const sectionBackup = {
+                    version: '5.0',
+                    exportedAt: new Date().toISOString(),
+                    type: `SECTION_${section}`,
+                    data: JSON.parse(rawData || (section === 'SHIFTS' || section === 'HOLIDAYS' ? '{}' : '[]'))
+                };
+                downloadJSON(sectionBackup, `Respaldo_${section}_${dateStr}.json`);
+                showToast(`Copia de Seguridad de ${section} descargada con éxito.`);
+            }
+        }
+
+        // Disparar diálogo de selección de archivo
+        function triggerImport(section) {
+            currentImportSection = section;
+            const fileInput = document.getElementById('backup-file-input');
+            fileInput.value = '';
+            fileInput.click();
+        }
+
+        // Procesar lectura e importación del archivo cargado
+        function handleImportFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    if (!json.data) {
+                        showToast('Formato de archivo inválido.', false);
+                        return;
+                    }
+
+                    const keys = db.STORAGE_KEYS;
+
+                    if (currentImportSection === 'ALL') {
+                        if (json.data.workers) localStorage.setItem(keys.WORKERS, JSON.stringify(json.data.workers));
+                        if (json.data.shifts) localStorage.setItem(keys.SHIFTS, JSON.stringify(json.data.shifts));
+                        if (json.data.holidays) localStorage.setItem(keys.HOLIDAYS, JSON.stringify(json.data.holidays));
+                        if (json.data.attendance) localStorage.setItem(keys.ATTENDANCE, JSON.stringify(json.data.attendance));
+                        if (json.data.pavilions) localStorage.setItem(keys.PAVILIONS, JSON.stringify(json.data.pavilions));
+                        showToast('¡Respaldo General restaurado con éxito!');
+                    } else {
+                        const targetKey = keys[currentImportSection];
+                        const dataToImport = json.data;
+                        localStorage.setItem(targetKey, JSON.stringify(dataToImport));
+                        showToast(`¡Sección ${currentImportSection} restaurada con éxito!`);
+                    }
+
+                    closeBackupModal();
+                    // Refrescar vistas según la pantalla activa
+                    renderScheduleTable();
+                    loadAttendanceLogs();
+                    renderWorkerManagementList();
+                    renderPavilionsGrid();
+
+                } catch (err) {
+                    showToast('Error al leer o procesar el archivo JSON.', false);
+                }
+            };
+            reader.readAsText(file);
         }
     </script>
 </body>
